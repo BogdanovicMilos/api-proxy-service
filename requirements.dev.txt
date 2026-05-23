@@ -1,0 +1,5 @@
+pre-commit
+pylint
+pytest>=7.4.2
+pytest-cov
+pytest-mock==3.11.1

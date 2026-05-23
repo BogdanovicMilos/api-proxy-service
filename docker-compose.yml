@@ -1,0 +1,12 @@
+name: api-proxy
+services:
+  api:
+    build:
+      dockerfile: Dockerfile
+    container_name: api-proxy
+    restart: unless-stopped
+    env_file:
+      - path: ".env"
+        required: false
+    ports:
+      - "8000:8000"

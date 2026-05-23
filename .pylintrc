@@ -1,0 +1,77 @@
+[MAIN]
+# Source roots — pylint resolves intra-project imports through these.
+init-hook='import sys; sys.path.insert(0, ".")'
+
+# Files / dirs pylint should never touch.
+ignore=.venv,venv,.git,__pycache__,build,dist,.idea,.mypy_cache,.pytest_cache,.ruff_cache
+
+# Match flake8/black's effective limit.
+max-line-length=100
+
+# Skip files that aren't proper modules (e.g. snippets).
+ignore-patterns=
+
+# Allow modern type-annotation usage from __future__.
+py-version=3.12
+
+
+[MESSAGES CONTROL]
+# Disable rules that fight FastAPI / Pydantic v2 idioms or are noise for this codebase.
+#
+# - missing-*-docstring: docstrings on every module/class/func is overkill for a small service.
+# - too-few-public-methods: triggers on dataclasses/Pydantic models that are correct as-is.
+# - too-many-arguments / too-many-instance-attributes: triggers on config dataclasses.
+# - too-many-positional-arguments: same family.
+# - duplicate-code: noisy across normalizers + provider call shims.
+# - broad-exception-caught: we deliberately catch broad in a few defensive spots (with audit).
+# - import-outside-toplevel: occasionally needed for lazy provider imports.
+# - logging-fstring-interpolation: we use structured logging, not %-format.
+# - redefined-builtin / unused-argument: managed by leading-underscore convention already.
+disable=
+    C0114,  # missing-module-docstring
+    C0115,  # missing-class-docstring
+    C0116,  # missing-function-docstring
+    R0903,  # too-few-public-methods
+    R0913,  # too-many-arguments
+    R0902,  # too-many-instance-attributes
+    R0917,  # too-many-positional-arguments
+    R0801,  # duplicate-code
+    W0718,  # broad-exception-caught
+    C0415,  # import-outside-toplevel
+    W1203,  # logging-fstring-interpolation
+    E0401,  # import-error — pre-commit runs pylint in isolated env without runtime deps
+    W0603,  # global-statement — module-level provider singleton uses `global _instance` intentionally
+    W0212   # protected-access — logging.audit sets a marker attribute on the root logger to make configure_logging idempotent
+
+
+[FORMAT]
+max-line-length=100
+indent-string='    '
+
+
+[DESIGN]
+max-args=8
+max-attributes=12
+max-locals=20
+max-returns=8
+max-branches=15
+max-statements=60
+
+
+[BASIC]
+# Variable / argument names: snake_case, optional leading underscore for "unused".
+variable-rgx=^_?[a-z][a-z0-9_]*$
+argument-rgx=^_?[a-z][a-z0-9_]*$
+
+# Class names: CamelCase.
+class-rgx=^_?[A-Z][a-zA-Z0-9]+$
+
+# Allow short, idiomatic names like e, exc, rid, op, p.
+good-names=i,j,k,n,_,e,ex,exc,rid,op,p
+
+
+[TYPECHECK]
+# Pydantic v2's dynamic model machinery confuses pylint. Tell it to trust attributes
+# on subclasses of BaseModel rather than flagging unknown-member errors.
+generated-members=
+    pydantic.BaseModel.*
